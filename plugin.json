@@ -1,5 +1,5 @@
 {
-	"name": "oauthd_statistics",
+	"name": "server.statistics",
 	"description": "A plugins that allow to get stats on connexion.",
 	"version": "0.0.1"
 }
