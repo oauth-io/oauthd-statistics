@@ -1,2 +1,2 @@
-oauthd_plugin_test2
+oauthd_plugin_stats
 ===================

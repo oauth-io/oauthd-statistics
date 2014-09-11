@@ -1,5 +1,5 @@
 {
-	"name": "My second OAuthd plugin",
-	"description": "super description2",
+	"name": "oauthd_statistics",
+	"description": "A plugins that allow to get stats on connexion.",
 	"version": "0.0.1"
 }
