@@ -2,5 +2,5 @@
 	"name": "server.statistics",
 	"description": "A plugins that allow to get stats on connexion.",
 	"version": "0.0.1",
-	"main": "index.js",
+	"main": "index.js"
 }
