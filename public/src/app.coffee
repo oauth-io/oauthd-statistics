@@ -20,6 +20,7 @@ require('./filters/filters') app
 require('./services/AnalyticsService') app
 
 require('./controllers/DashboardCtrl') app
+require('./controllers/AnalyticsCtrl') app
 
 app.run(["$rootScope", 
 	($rootScope) ->
