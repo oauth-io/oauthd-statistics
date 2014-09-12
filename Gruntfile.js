@@ -1,5 +1,3 @@
-var config = require('../../../config');
-console.log("config gruntfile plugin", config);
 
 module.exports = function(grunt) {
 	grunt.initConfig({
@@ -28,16 +26,7 @@ module.exports = function(grunt) {
 		browserify: {
 			js: {
 				src: 'bin/staticjs/public/src/app.js',
-				dest: 'bin/public/src/app.js',
-				options: {
-                    transform: [
-                        [
-                            'envify', {
-                                host: config.host_url
-                            }
-                        ]
-                    ]
-                }
+				dest: 'bin/public/src/app.js'
 			}
 		},
 		copy: {

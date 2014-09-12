@@ -1,5 +1,3 @@
-async = require 'async'
-
 module.exports = (app) ->
 	app.controller 'AnalyticsCtrl', ['$scope', '$state', '$rootScope',
 		($scope, $state, $rootScope) ->

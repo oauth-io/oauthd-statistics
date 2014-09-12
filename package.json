@@ -1,5 +1,5 @@
 {
-  "name": "front",
+  "name": "oauthd_plugin_stats",
   "version": "1.0.0",
   "description": "",
   "main": "Gruntfile.js",
