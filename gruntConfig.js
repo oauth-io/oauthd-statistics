@@ -11,11 +11,20 @@ module.exports = function(gruntConf) {
 			bare: true
 		}
 	};
+	
 	gruntConf.watch['oauthd_plugin_stats'] = {
 		files: [
 			__dirname + '/**/*.coffee'
 		],
 		tasks: ['coffee:oauthd_plugin_stats']
+	};
+
+	gruntConf.watch['front'] = {
+		files: [
+			__dirname + '/**/*.coffee',
+			__dirname + '/public/**/*'
+		],
+		tasks: ['subgrunt:front']
 	};
 
 	return function() {
