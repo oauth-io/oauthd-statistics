@@ -3,14 +3,7 @@ ecstatic = require 'ecstatic'
 fs = require 'fs'
 plugin_data = require '../plugin.json'
 
-# shared = require '../../../bin/plugin_shared'
-# {db,check} = shared
-
 exports.setup = (callback) ->
-	console.log "IN SETUP plugin stats"
-	console.log "SETUP plugin stats @server", @server
-	console.log "SETUP plugin stats @config", @config
-
 	@server.get @config.base_api + '/oauthd/plugins/' + plugin_data.name, (req, res, next) ->
 		console.log "IN OAUTHD PLUGIN PATH"
 		fs.stat __dirname + '/public' + req.params[0], (err, stat) ->
@@ -28,4 +21,4 @@ exports.setup = (callback) ->
 
 	callback()
 
-shared[plugin_data.name] = exports
+console.log "plugin_data.name", plugin_data.name

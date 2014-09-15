@@ -1,1 +1,1 @@
-require('./bin/server.js');
+module.exports = require('./bin/server.js');
