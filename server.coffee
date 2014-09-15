@@ -27,3 +27,5 @@ exports.setup = (callback) ->
 		default: __dirname + '/public/index.html'
 
 	callback()
+
+shared[plugin_data.name] = exports
