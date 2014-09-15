@@ -4,8 +4,7 @@ fs = require 'fs'
 plugin_data = require '../plugin.json'
 
 exports.setup = (callback) ->
-	@server.get @config.base_api + '/oauthd/plugins/' + plugin_data.name, (req, res, next) ->
-		console.log "IN OAUTHD PLUGIN PATH"
+	@server.get '/oauthd/plugins/' + plugin_data.name, (req, res, next) ->
 		fs.stat __dirname + '/public' + req.params[0], (err, stat) ->
 			if stat?.isFile()
 				next()
@@ -20,5 +19,3 @@ exports.setup = (callback) ->
 		default: __dirname + '/public/index.html'
 
 	callback()
-
-console.log "plugin_data.name", plugin_data.name
