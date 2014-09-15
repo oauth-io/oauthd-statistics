@@ -4,8 +4,9 @@ fs = require 'fs'
 plugin_data = require '../plugin.json'
 
 exports.setup = (callback) ->
-	@server.get '/oauthd/plugins/' + plugin_data.name, (req, res, next) ->
-		fs.stat __dirname + '/public' + req.params[0], (err, stat) ->
+	@server.get /^(\/oauthd\/plugins\/statistics(\/.*)?)/, (req, res, next) ->
+		str = req.params[0].replace('/oauthd/plugins/statistics', '')
+		fs.stat __dirname + '/public' + str, (err, stat) ->
 			if stat?.isFile()
 				next()
 				return
