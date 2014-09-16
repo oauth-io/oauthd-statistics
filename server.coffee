@@ -81,7 +81,9 @@ exports.setup = (callback) ->
 		req.params.target = 'co:p:' + req.params.provider
 		sendStats req.params, @server.send(res, next)
 
-	@server.get @config.base_api + '/analytics', @auth.needed, @auth.analytics, (req, res, next) =>
+	@server.get @config.base_api + '/analytics', @auth.needed, (req, res, next) =>
+		req.filters = req.params.filters.split ","
+		req.appkeys = req.params.appkeys.split ","
 		# console.log ""
 		# console.log "server_statistics analytics"
 		# console.log "req.appkeys", req.appkeys
@@ -106,5 +108,4 @@ exports.setup = (callback) ->
 
 
 	callback()
-	
 	

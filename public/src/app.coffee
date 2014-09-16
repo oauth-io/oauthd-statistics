@@ -8,6 +8,11 @@ app = angular.module("oauthd_stats_plugin", ["ui.router"]).config(["$stateProvid
 			templateUrl: '/oauthd/plugins/statistics/templates/dashboard.html'
 			controller: 'statistics_plugin_DashboardCtrl'
 
+		$stateProvider.state 'analytics',
+			url: '/',
+			templateUrl: '/oauthd/plugins/statistics/templates/analytics.html'
+			controller: 'statistics_plugin_AnalyticsCtrl'
+
 		$urlRouterProvider.when "", "dashboard"
 
 		$urlRouterProvider.otherwise "dashboard" 
