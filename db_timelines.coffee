@@ -14,7 +14,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-{check,db} = shared = require '../shared'
+# {@check,@db} = shared = require '../shared'
 
 dateFormat = (date, format) ->
 	format = format.replace "DD", (if date.getUTCDate() < 10 then '0' else '') + date.getUTCDate()
@@ -23,17 +23,18 @@ dateFormat = (date, format) ->
 	format = format.replace "YYYY", date.getUTCFullYear()
 	return format
 
-exports.getTotal = check 'string', (target, callback) ->
-	db.redis.get 'st:' + target + ':t', (err, total) ->
+exports.getTotal = @check 'string', (target, callback) ->
+	@db.redis.get 'st:' + target + ':t', (err, total) ->
 		return callback err if err
 		callback null, total
 
-exports.getTimeline = check 'string', unit:'string', start:'int', end:'int', (target, data, callback) ->
+exports.getTimeline = @check 'string', unit:'string', start:['int','number'], end:['int','number'], (target, data, callback) ->
 	unit = data.unit || 'm'
 	keys = {}
-	date = new Date (data.start * 1000)
-	dateEnd = new Date (data.end * 1000)
-
+	date = new Date()
+	date.setTime(data.start)
+	dateEnd = new Date()
+	dateEnd.setTime(data.end)
 	if unit == 'm'
 		loop
 			year = date.getFullYear()
@@ -59,7 +60,7 @@ exports.getTimeline = check 'string', unit:'string', start:'int', end:'int', (ta
 			date = new Date(year, month, day, hours + 1)
 			break unless (date <= dateEnd)
 
-	db.redis.mget Object.keys(keys), (err, res) ->
+	@db.redis.mget Object.keys(keys), (err, res) ->
 		return callback err if err
 		result = {}
 		for k,v of keys
@@ -70,7 +71,7 @@ exports.getTimeline = check 'string', unit:'string', start:'int', end:'int', (ta
 				result[v] = 0
 		callback null, result
 
-exports.addUse = check target:'string', uses:['number','none'], (data, callback) ->
+exports.addUse = @check target:'string', uses:['number','none'], (data, callback) ->
 	date = new Date
 	month = date.getFullYear() + "-" + (date.getMonth() + 1)
 	day = month + "-" + date.getDate()
@@ -83,6 +84,6 @@ exports.addUse = check target:'string', uses:['number','none'], (data, callback)
 		['incrby', 'st:' + target + ':h:' + hours, uses]
 		['incrby', 'st:' + target + ':t', uses]
 	]
-	(db.redis.multi rediscmds).exec callback
+	(@db.redis.multi rediscmds).exec callback
 
-db.timelines = exports
+@db.timelines = exports
