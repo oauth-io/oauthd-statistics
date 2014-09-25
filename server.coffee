@@ -26,14 +26,14 @@ exports.setup = (callback) ->
 		default: __dirname + '/public/index.html'
 
 
-	@db.timelines = require './db_timelines'
+	@db.timelines = require('./db_timelines')(@)
 
-	@on 'connect.callback', (data) =>
+	@events.on 'connect.callback', (data) =>
 		@db.timelines.addUse target:'co:a:' + data.key + ':' + data.status, (->)
 		@db.timelines.addUse target:'co:p:' + data.provider + ':' + data.status, (->)
 		@db.timelines.addUse target:'co:a:' + data.key + ':p:' + data.provider + ':' + data.status, (->)
 
-	@on 'connect.auth', (data) =>
+	@events.on 'connect.auth', (data) =>
 		@db.timelines.addUse target:'co:p:' + data.provider, (->)
 		@db.timelines.addUse target:'co:a:' + data.key + ':p:' + data.provider, (->)
 		@db.timelines.addUse target:'co:a:' + data.key, (->)
