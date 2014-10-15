@@ -105,5 +105,5 @@ module.exports = (env) ->
 					res.send totals:resTotal, timelines:resTime, params:req.params
 					next()
 
-	callback()
+		callback()
 	

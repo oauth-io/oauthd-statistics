@@ -9,7 +9,7 @@ Url = require('url');
 async = require('async');
 
 module.exports = function(env) {
-  ({
+  return {
     setup: function(callback) {
       var sendStats;
       env.server.get(/^(\/oauthd\/plugins\/statistics(\/.*)?)/, function(req, res, next) {
@@ -139,7 +139,7 @@ module.exports = function(env) {
           return sendStats(req.params, env.server.send(res, next));
         };
       })(this));
-      return env.server.get(env.config.base_api + '/analytics', env.middlewares.auth.needed, (function(_this) {
+      env.server.get(env.config.base_api + '/analytics', env.middlewares.auth.needed, (function(_this) {
         return function(req, res, next) {
           var filter, tasksTime, tasksTotal, _fn, _i, _len, _ref;
           req.filters = req.params.filters.split(",");
@@ -178,7 +178,7 @@ module.exports = function(env) {
           });
         };
       })(this));
+      return callback();
     }
-  });
-  return callback();
+  };
 };
