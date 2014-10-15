@@ -5,7 +5,7 @@ async = require 'async'
 
 module.exports = (env) ->
 	setup: (callback) ->
-		@server.get /^(\/oauthd\/plugins\/statistics(\/.*)?)/, (req, res, next) ->
+		env.server.get /^(\/oauthd\/plugins\/statistics(\/.*)?)/, (req, res, next) ->
 			req.params[1] ?= ""
 			req.url = req.params[1]
 			req._url = Url.parse req.url
@@ -66,21 +66,21 @@ module.exports = (env) ->
 				callback null, res
 
 		# get statistics for an app
-		@server.get env.config.base_api + '/apps/:key/stats', env.middlewares.auth.needed, (req, res, next) =>
+		env.server.get env.config.base_api + '/apps/:key/stats', env.middlewares.auth.needed, (req, res, next) =>
 			req.params.target = 'co:a:' + req.params.key
-			sendStats req.params, @server.send(res, next)
+			sendStats req.params, env.server.send(res, next)
 
 		# get statistics for a keyset
-		@server.get env.config.base_api + '/apps/:key/keysets/:provider/stats', env.middlewares.auth.needed, (req, res, next) =>
+		env.server.get env.config.base_api + '/apps/:key/keysets/:provider/stats', env.middlewares.auth.needed, (req, res, next) =>
 			req.params.target = 'co:a:' + req.params.key + ':p:' + req.params.provider
-			sendStats req.params, @server.send(res, next)
+			sendStats req.params, env.server.send(res, next)
 
 		# get statistics for a provider
-		@server.get env.config.base_api + '/providers/:provider/stats', env.middlewares.auth.needed, (req, res, next) =>
+		env.server.get env.config.base_api + '/providers/:provider/stats', env.middlewares.auth.needed, (req, res, next) =>
 			req.params.target = 'co:p:' + req.params.provider
-			sendStats req.params, @server.send(res, next)
+			sendStats req.params, env.server.send(res, next)
 
-		@server.get env.config.base_api + '/analytics', env.middlewares.auth.needed, (req, res, next) =>
+		env.server.get env.config.base_api + '/analytics', env.middlewares.auth.needed, (req, res, next) =>
 			req.filters = req.params.filters.split ","
 			req.appkeys = req.params.appkeys.split ","
 			# console.log ""
@@ -104,7 +104,6 @@ module.exports = (env) ->
 					# console.log "resTotal", resTotal
 					res.send totals:resTotal, timelines:resTime, params:req.params
 					next()
-
 
 	callback()
 	
