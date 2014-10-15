@@ -1,0 +1,95 @@
+Analytics OAuthd Statistics Plugin
+
+<a ui-sref="dashboard">Go to dashboard</a>
+
+
+<div class="analytics">
+	<div class="toolbar">
+		<div class="btn-group">
+			<button type="button" class="toolbar-btn dropdown-toggle" data-toggle="dropdown"><i class="glyphicon glyphicon-plus"></i> Add filter<span class="caret">
+			</button>
+			<ul class="dropdown-menu" role="menu">
+				<li ng-repeat="fvalue in filters" ng-class="{'selected': showApps}">
+					<a ng-model="showApps" ng-mouseenter="showApps = true" ng-mouseleave="showApps = false">{{fvalue.name}}</a>
+					<div ng-click"hoverdropdownClick($event)" class="hoverdropdown btn-group" ng-mouseenter="showApps = true" ng-mouseleave="showApps = false" ng-class="{'open': showApps}">
+						<ul class="hoverdropdown dropdown-menu" role="menu">
+							<div role="presentation" class="hoverdropdown dropdown-header">{{fvalue.name}}</div>
+							<li ng-repeat="line in lines" ng-if="line.filter.name == fvalue.name" ng-class="{'selected': show}">
+								<a ng-click="updateLine(line, $event)" ng-model="show" ng-mouseenter="show = true" ng-mouseleave="show = false">
+				  					<span class="glyphicon addline" ng-class="{'glyphicon-plus-sign': !line.active && line.sublines.length > 0, 'glyphicon-minus-sign': line.active && line.sublines.length > 0, 'glyphicon-ban-circle': line.sublines.length == 0}"></span>{{line.app.name || 'All apps'}}
+				  				</a>
+				  				<div ng-click"hoverdropdownClick($event)" class="hoverdropdown btn-group" ng-mouseenter="show = true" ng-mouseleave="show = false" ng-class="{'open': show}">
+						  			<ul class="hoverdropdown dropdown-menu" role="menu">
+						  				<div role="presentation" class="hoverdropdown dropdown-header">Providers</div>
+						  				<li ng-show="line.sublines.length == 0">
+						  					<a ng-click="updateSubline(null, null, $event)"> no provider yet!</a>
+						  				</li>
+						  				<li ng-repeat="subline in line.sublines" ng-model="showUnique" ng-mouseenter="showUnique = true" ng-mouseleave="showUnique = false" ng-class="{'selected': showUnique}">
+						  					<a ng-click="updateSubline(subline, line, $event)"><span class="glyphicon unique" ng-class="{'glyphicon-unchecked': !subline.active, 'glyphicon-check': subline.active}"/>{{subline.provider || 'All'}}</a>
+						  					<div ng-click"hoverdropdownClick($event)" class="hoverdropdown btn-group" ng-mouseenter="showUnique = true" ng-mouseleave="showUnique = false" ng-class="{'open': showUnique}" data-ng-show="subline.filter.allowuniq">
+							  					<ul class="hoverdropdown dropdown-menu" role="menu">
+					  								<li role="presentation" class="hoverdropdown dropdown-header">Unique visitors</li>
+							  						<li><a ng-click="updateSublineUnique(subline, line, $event)"><span class="glyphicon unique" ng-class="{'glyphicon-unchecked': !subline.filter.unique, 'glyphicon-check': subline.filter.unique}"/>unique</a></li>
+						  						</ul>
+					  						</div>
+						  				</li>
+						  			</ul>
+					  			</div>
+							</li>
+						</ul>
+					</div>
+				</li>
+			</ul>
+		</div>
+		<div class="btn-group">
+		  <button type="button" class="toolbar-btn dropdown-toggle" data-toggle="dropdown">{{ startDate.name }}<span class="caret">
+		  </button>
+		  <ul class="dropdown-menu" role="menu">
+		  	<li ng-repeat="value in startDates">
+		  		<a ng-click="changeStartDate(value, $event)">{{value.name}}</a>
+		  	</li>
+		  </ul>
+		</div>
+		<div class="btn-group">
+		  <button type="button" class="toolbar-btn dropdown-toggle" data-toggle="dropdown">{{ timeUnit.name }}<span class="caret">
+		  </button>
+		  <ul class="dropdown-menu" role="menu">
+		  	<li ng-repeat="value in timeUnits | filter:filterUnit">
+		  		<a ng-click="changeUnit(value, $event)">{{value.name}}</a>
+		  	</li>
+		  </ul>
+		</div>
+	</div>
+	<div class="canvas">
+		<div class="center-container">
+			<img src="/img/ajax-loader-pricing.gif" ng-show="analyticsLoading"/>
+		</div>
+		<div class="center-container" ng-show="noanalytics">
+			<img style="margin-top:20px" src="/img/noanalytics-yet2.png"/>
+			<h1 style="color:#5e85a1; font-family: Lato">No analytics yet</h1>
+			<p style="color:#5e85a1; font-family: Lato">Make your first connections and track them here</p>
+		</div>
+		<canvas id="chartCanevas"></canvas>
+	</div>
+	<div class="filters-container inactive" ng-show="(items = (lines | filter:undisplayedSublines)).length > 0" ng-hide="noanalytics">
+		<div class="filter" ng-repeat="line in lines | filter:activeLine">
+			<div class="filter" ng-repeat="subline in line.sublines | filter:undisplayedSubline">
+				<!-- <span class="glyphicon glyphicon-eye-close"></span> -->
+				<a ng-click="" style="color: {{subline.color}}; text-decoration:none;">{{ subline.name }}</a>
+				<span ng-click="displaySubline(subline, $event)" class="glyphicon glyphicon-plus"></span>
+				<span ng-click="removeSubline(subline, $event)" class="glyphicon glyphicon-remove"></span>
+			</div>
+		</div>
+	</div>
+	<div class="filters-container" ng-show="(items = (lines | filter:displayedSublines)).length > 0">
+		<div class="filter" ng-repeat="line in lines | filter:activeLine">
+			<div class="filter" ng-repeat="subline in line.sublines | filter:displayedSubline">
+				<div class="square" style="background: {{subline.color}};"></div>
+				<a ng-click="" style="color: {{subline.color}}; text-decoration:none;">{{ subline.name }}</a>
+				<span ng-click="displaySubline(subline, $event)" class="glyphicon glyphicon-minus"></span>
+				<span ng-click="removeSubline(subline, line, $event)" class="glyphicon glyphicon-remove"></span>
+				<span class="filter-sel-info"><strong>Total:</strong> {{subline.total}} - <strong>Selected:</strong> {{subline.selTotal}}</span>
+			</div>
+		</div>
+	</div>
+</div>
