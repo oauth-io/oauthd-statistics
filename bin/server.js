@@ -12,7 +12,7 @@ module.exports = function(env) {
   ({
     setup: function(callback) {
       var sendStats;
-      this.server.get(/^(\/oauthd\/plugins\/statistics(\/.*)?)/, function(req, res, next) {
+      env.server.get(/^(\/oauthd\/plugins\/statistics(\/.*)?)/, function(req, res, next) {
         var _base;
         if ((_base = req.params)[1] == null) {
           _base[1] = "";
@@ -121,25 +121,25 @@ module.exports = function(env) {
           });
         };
       })(this));
-      this.server.get(env.config.base_api + '/apps/:key/stats', env.middlewares.auth.needed, (function(_this) {
+      env.server.get(env.config.base_api + '/apps/:key/stats', env.middlewares.auth.needed, (function(_this) {
         return function(req, res, next) {
           req.params.target = 'co:a:' + req.params.key;
-          return sendStats(req.params, _this.server.send(res, next));
+          return sendStats(req.params, env.server.send(res, next));
         };
       })(this));
-      this.server.get(env.config.base_api + '/apps/:key/keysets/:provider/stats', env.middlewares.auth.needed, (function(_this) {
+      env.server.get(env.config.base_api + '/apps/:key/keysets/:provider/stats', env.middlewares.auth.needed, (function(_this) {
         return function(req, res, next) {
           req.params.target = 'co:a:' + req.params.key + ':p:' + req.params.provider;
-          return sendStats(req.params, _this.server.send(res, next));
+          return sendStats(req.params, env.server.send(res, next));
         };
       })(this));
-      this.server.get(env.config.base_api + '/providers/:provider/stats', env.middlewares.auth.needed, (function(_this) {
+      env.server.get(env.config.base_api + '/providers/:provider/stats', env.middlewares.auth.needed, (function(_this) {
         return function(req, res, next) {
           req.params.target = 'co:p:' + req.params.provider;
-          return sendStats(req.params, _this.server.send(res, next));
+          return sendStats(req.params, env.server.send(res, next));
         };
       })(this));
-      return this.server.get(env.config.base_api + '/analytics', env.middlewares.auth.needed, (function(_this) {
+      return env.server.get(env.config.base_api + '/analytics', env.middlewares.auth.needed, (function(_this) {
         return function(req, res, next) {
           var filter, tasksTime, tasksTotal, _fn, _i, _len, _ref;
           req.filters = req.params.filters.split(",");
