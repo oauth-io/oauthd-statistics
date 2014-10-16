@@ -6,18 +6,15 @@ app = angular.module("oauthd_stats_plugin", ["ui.router"]).config(["$stateProvid
 		$stateProvider.state 'dashboard',
 			url: '/',
 			templateUrl: '/oauthd/plugins/statistics/templates/dashboard.html'
-			controller: 'statistics_plugin_DashboardCtrl'
+			controller: 'DashboardCtrl'
 
 		$stateProvider.state 'analytics',
 			url: '/',
 			templateUrl: '/oauthd/plugins/statistics/templates/analytics.html'
-			controller: 'statistics_plugin_AnalyticsCtrl'
+			controller: 'AnalyticsCtrl'
 
 		$urlRouterProvider.when "", "dashboard"
-
-		$urlRouterProvider.otherwise "dashboard" 
-
-		$locationProvider.html5Mode(true)
+		$urlRouterProvider.otherwise "dashboard"
 ])
 
 require('./filters/filters') app

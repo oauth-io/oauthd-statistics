@@ -1,7 +1,7 @@
 Q = require('q')
 
 module.exports = (app) ->
-	app.factory('statistics_plugin_AnalyticsService', ['$http', '$rootScope', '$location', 
+	app.factory('AnalyticsService', ['$http', '$rootScope', '$location', 
 		($http, $rootScope, $location) ->
 			# api = apiRequest $http, $rootScope
 			api = require('../utilities/apiCaller') $http, $rootScope

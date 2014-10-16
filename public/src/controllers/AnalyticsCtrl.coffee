@@ -1,7 +1,7 @@
 sugar = require 'sugar'
 
 module.exports = (app) ->
-	app.controller('statistics_plugin_AnalyticsCtrl', ['$scope', '$state', '$rootScope', 'statistics_plugin_AnalyticsService', 'AppService', 
+	app.controller('AnalyticsCtrl', ['$scope', '$state', '$rootScope', 'AnalyticsService', 'AppService', 
 		($scope, $state, $rootScope, statistics_plugin_AnalyticsService, AppService) ->
 			console.log "IN statistics_plugin_AnalyticsCtrl"
 			
