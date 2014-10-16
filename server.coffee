@@ -25,7 +25,7 @@ module.exports = (env) ->
 			default: __dirname + '/public/index.html'
 
 
-		env.data.timelines = require './db_timelines'
+		env.data.timelines = require('./db_timelines')(env)
 
 		env.events.on 'connect.callback', (data) =>
 			env.data.timelines.addUse target:'co:a:' + data.key + ':' + data.status, (->)

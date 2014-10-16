@@ -36,7 +36,7 @@ module.exports = function(env) {
         directory: __dirname + '/public',
         "default": __dirname + '/public/index.html'
       }));
-      env.data.timelines = require('./db_timelines');
+      env.data.timelines = require('./db_timelines')(env);
       env.events.on('connect.callback', (function(_this) {
         return function(data) {
           env.data.timelines.addUse({
