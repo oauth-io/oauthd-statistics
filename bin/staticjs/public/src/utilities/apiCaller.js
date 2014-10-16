@@ -21,7 +21,6 @@ module.exports = function($http, $rootScope) {
     if (opts.method === "POST" || opts.method === "PUT") {
       opts.headers['Content-Type'] = 'application/json';
     }
-    console.log("Stats app opts", opts);
     req = $http(opts);
     if (success) {
       req.success(success);

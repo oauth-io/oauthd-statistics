@@ -8,18 +8,18 @@ module.exports = (app) ->
 				all: () ->
 					defer = Q.defer()
 					api '/apps', (data) ->
-						console.log "in stats AppService data", data
 						defer.resolve data.data
 					, (e) ->
-						console.log "in stats AppService err", e
 						defer.reject e
 					return defer.promise
 				get: (key) ->
 					defer = Q.defer()
 					api '/apps/' + key, (data) ->
-						defer.resolve(data.data)
+						console.log "AppService get data", data
+						defer.resolve data.data
 					, (e) ->
-						defer.reject(e)
+						console.log "AppService get fail", e
+						defer.reject e
 					return defer.promise
 				create: (app) ->
 					defer = Q.defer()

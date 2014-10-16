@@ -1,40 +1,58 @@
-var __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
+var async,
+  __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
+
+async = require('async');
 
 module.exports = function(app) {
   return app.controller('AnalyticsCtrl', [
     '$scope', '$state', '$rootScope', 'AnalyticsService', 'AppService', function($scope, $state, $rootScope, AnalyticsService, AppService) {
       var Line, Subline, drawGraph, getApps, getGraphData, initAnalytics, initCtrl, localUpdateLine, updateChartData, updateLineActive;
-      console.log("IN statistics_plugin_AnalyticsCtrl");
       getApps = function(callback) {
         return AppService.all().then(function(apps) {
-          console.log("apps", apps);
-          return callback(null, apps);
+          return async.eachSeries(apps, function(app, next) {
+            return AppService.get(app.key).then(function(app_data) {
+              var j, k, v, _ref;
+              for (j in app_data) {
+                app[j] = app_data[j];
+              }
+              _ref = app_data.keysets;
+              for (k in _ref) {
+                v = _ref[k];
+                $scope.providers[v] = true;
+              }
+              return next();
+            }).fail(function(e) {
+              if (e) {
+                return next(e);
+              }
+            });
+          }, function(err) {
+            if (err) {
+              return callback(err);
+            }
+            return callback(null, apps);
+          });
         }).fail(function(e) {
-          console.log(e);
           if (e) {
             return callback(e);
           }
-        })["finally"](function() {
-          return $scope.$apply();
         });
       };
-      if (!$rootScope.statistics_plugin_analytics) {
-        $rootScope.statistics_plugin_analytics = {};
+      if (!$rootScope.analytics) {
+        $rootScope.analytics = {};
       } else {
-        $scope.chartCanevas = $rootScope.statistics_plugin_analytics.chartCanevas;
-        $scope.startDate = $rootScope.statistics_plugin_analytics.startDate;
-        $scope.timeUnit = $rootScope.statistics_plugin_analytics.timeUnit;
-        $scope.lines = $rootScope.statistics_plugin_analytics.lines;
-        $scope.analytics_info = $rootScope.statistics_plugin_analytics.analytics_info;
+        $scope.chartCanevas = $rootScope.analytics.chartCanevas;
+        $scope.startDate = $rootScope.analytics.startDate;
+        $scope.timeUnit = $rootScope.analytics.timeUnit;
+        $scope.lines = $rootScope.analytics.lines;
+        $scope.analytics_info = $rootScope.analytics.analytics_info;
       }
       initCtrl = function() {
         $scope.apps = [];
-        console.log("initCtrl before getApps", $scope.apps);
         return getApps(function(err, apps) {
-          console.log("initCtrl getApps err", err);
           if (!err) {
             $scope.apps = apps;
-            console.log("end initCtrl $scope.apps", $scope.apps);
+            $scope.$apply();
             return initAnalytics();
           }
         });
@@ -133,10 +151,12 @@ module.exports = function(app) {
           _ref = $scope.filters;
           for (_i = 0, _len = _ref.length; _i < _len; _i++) {
             filter = _ref[_i];
+            console.log("filter", filter);
             $scope.lines.push(new Line(null, Object.clone(filter, true)));
             _ref1 = $scope.apps;
             for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
               app = _ref1[_j];
+              console.log("app", app);
               $scope.lines.push(new Line(Object.clone(app, true), Object.clone(filter, true)));
             }
           }
@@ -159,7 +179,7 @@ module.exports = function(app) {
       $scope.changeStartDate = function(selected) {
         var s;
         $scope.startDate = selected;
-        $rootScope.statistics_plugin_analytics.startDate = $scope.startDate;
+        $rootScope.analytics.startDate = $scope.startDate;
         return $scope.changeUnit(s = {
           name: selected.unitname,
           value: selected.unit
@@ -167,7 +187,7 @@ module.exports = function(app) {
       };
       $scope.changeUnit = function(selected) {
         $scope.timeUnit = selected;
-        $rootScope.statistics_plugin_analytics.timeUnit = $scope.timeUnit;
+        $rootScope.analytics.timeUnit = $scope.timeUnit;
         return getGraphData();
       };
       $scope.filterUnit = function(selected) {
@@ -190,7 +210,7 @@ module.exports = function(app) {
           this.active = false;
           this.sublines = [];
           if (this.app && Object.keys(this.app).length !== 0) {
-            if (this.app.keysets.length > 1) {
+            if (this.app.keysets && this.app.keysets.length > 1) {
               this.sublines.push(new Subline(this.filter, null, this.app.key, this.app.name));
             }
             _ref = this.app.keysets;
@@ -545,8 +565,8 @@ module.exports = function(app) {
                 title: subline.name
               };
               $scope.chartCanevas.datasets.push(dataset);
-              $rootScope.statistics_plugin_analytics.lines = $scope.lines;
-              $rootScope.statistics_plugin_analytics.chartCanevas = $scope.chartCanevas;
+              $rootScope.analytics.lines = $scope.lines;
+              $rootScope.analytics.chartCanevas = $scope.chartCanevas;
             }
           }
         }
@@ -646,13 +666,13 @@ module.exports = function(app) {
         };
         if (drawData.labels.length === 0 && drawData.datasets.length === 0) {
           $scope.noanalytics = true;
-          $rootScope.statistics_plugin_analytics.analytics_info = $scope.analytics_info;
+          $rootScope.analytics.analytics_info = $scope.analytics_info;
           $scope.analyticsLoading = false;
           return false;
         } else {
           $scope.noanalytics = false;
         }
-        $rootScope.statistics_plugin_analytics.analytics_info = $scope.analytics_info;
+        $rootScope.analytics.analytics_info = $scope.analytics_info;
         $scope.analyticsLoading = false;
         chart = new Chart($("#chartCanevas").get(0).getContext('2d'));
         return chart.Line(drawData, newopts);

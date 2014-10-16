@@ -12,10 +12,8 @@ module.exports = function(app) {
           var defer;
           defer = Q.defer();
           api('/apps', function(data) {
-            console.log("in stats AppService data", data);
             return defer.resolve(data.data);
           }, function(e) {
-            console.log("in stats AppService err", e);
             return defer.reject(e);
           });
           return defer.promise;
@@ -24,8 +22,10 @@ module.exports = function(app) {
           var defer;
           defer = Q.defer();
           api('/apps/' + key, function(data) {
+            console.log("AppService get data", data);
             return defer.resolve(data.data);
           }, function(e) {
+            console.log("AppService get fail", e);
             return defer.reject(e);
           });
           return defer.promise;

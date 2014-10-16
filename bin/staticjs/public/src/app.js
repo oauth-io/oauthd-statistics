@@ -31,11 +31,8 @@ require('./controllers/AnalyticsCtrl')(app);
 app.run([
   "$rootScope", "$state", function($rootScope, $state) {
     console.log("APP.coffee oauthd plugin statistics_plugin_DashboardCtrl");
-    console.log("$state", $state);
     $rootScope.accessToken = JSON.parse(window.parent.localStorage.__amplify__loginData).data.token;
-    console.log("$rootScope.accessToken", $rootScope.accessToken);
     return $rootScope.$watch('window.parent.localStorage.__amplify__loginData', function() {
-      console.log("modify stats local storage login data");
       return $rootScope.accessToken = JSON.parse(window.parent.localStorage.__amplify__loginData).data.token;
     }, true);
   }

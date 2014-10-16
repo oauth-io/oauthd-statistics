@@ -1,52 +1,44 @@
+async = require 'async'
 
 module.exports = (app) ->
 	app.controller('AnalyticsCtrl', ['$scope', '$state', '$rootScope', 'AnalyticsService', 'AppService', 
 		($scope, $state, $rootScope, AnalyticsService, AppService) ->
-			console.log "IN statistics_plugin_AnalyticsCtrl"
-			
+
 			getApps = (callback) ->
 				AppService.all()
-				.then (apps) ->
-					console.log "apps", apps
-					# async.eachSeries apps, (app, next) ->
-					# 	AppService.get app.key
-					# 		.then (app_data) ->
-					# 			for j of app_data
-					# 				app[j] = app_data[j]
-									
-					# 			for k,v of app_data.keysets
-					# 				$scope.providers[v] = true
-					# 			next()
-					# 		.fail (e) ->
-					# 			console.log e
-					# 			next()
-					# , (err) ->
-					# 	$scope.$apply()
-					return callback null, apps
-				.fail (e) ->
-					console.log e
-					return callback e if e
-				.finally () ->
-					# $scope.loadingApps = false
-					$scope.$apply()
-					
-			if not $rootScope.statistics_plugin_analytics
-				$rootScope.statistics_plugin_analytics = {}
+					.then (apps) ->
+						async.eachSeries apps, (app, next) ->
+							AppService.get app.key
+								.then (app_data) ->
+									for j of app_data
+										app[j] = app_data[j]
+										
+									for k,v of app_data.keysets
+										$scope.providers[v] = true
+									next()
+								.fail (e) ->
+									next(e) if e
+						, (err) ->
+							return callback err if err
+							return callback null, apps
+					.fail (e) ->
+						return callback e if e
+
+			if not $rootScope.analytics
+				$rootScope.analytics = {}
 			else
-				$scope.chartCanevas = $rootScope.statistics_plugin_analytics.chartCanevas
-				$scope.startDate = $rootScope.statistics_plugin_analytics.startDate
-				$scope.timeUnit = $rootScope.statistics_plugin_analytics.timeUnit
-				$scope.lines = $rootScope.statistics_plugin_analytics.lines
-				$scope.analytics_info = $rootScope.statistics_plugin_analytics.analytics_info
+				$scope.chartCanevas = $rootScope.analytics.chartCanevas
+				$scope.startDate = $rootScope.analytics.startDate
+				$scope.timeUnit = $rootScope.analytics.timeUnit
+				$scope.lines = $rootScope.analytics.lines
+				$scope.analytics_info = $rootScope.analytics.analytics_info
 
 			initCtrl = () ->
 				$scope.apps = []
-				console.log "initCtrl before getApps", $scope.apps
 				getApps (err, apps) ->
-					console.log "initCtrl getApps err", err
 					if not err
 						$scope.apps = apps
-						console.log "end initCtrl $scope.apps", $scope.apps
+						$scope.$apply()
 						initAnalytics()
 
 			initAnalytics = () ->
@@ -92,7 +84,7 @@ module.exports = (app) ->
 						$scope.lines.push new Line(null, Object.clone(filter, true))
 						for app in $scope.apps
 							$scope.lines.push new Line(Object.clone(app, true), Object.clone(filter, true))
-
+				
 				#
 				#Chart drawing
 				#
@@ -113,12 +105,12 @@ module.exports = (app) ->
 
 			$scope.changeStartDate = (selected) ->
 				$scope.startDate = selected
-				$rootScope.statistics_plugin_analytics.startDate = $scope.startDate
+				$rootScope.analytics.startDate = $scope.startDate
 				$scope.changeUnit s=name:selected.unitname, value:selected.unit
 
 			$scope.changeUnit = (selected) ->
 				$scope.timeUnit = selected
-				$rootScope.statistics_plugin_analytics.timeUnit = $scope.timeUnit
+				$rootScope.analytics.timeUnit = $scope.timeUnit
 				getGraphData()
 
 			$scope.filterUnit = (selected) ->
@@ -137,7 +129,7 @@ module.exports = (app) ->
 					@active = false
 					@sublines = []
 					if @app and Object.keys(@app).length isnt 0
-						if @app.keysets.length > 1
+						if @app.keysets and @app.keysets.length > 1
 							@sublines.push new Subline(@filter, null, @app.key, @app.name)
 						for provider in @app.keysets
 							@sublines.push new Subline(@filter, provider, @app.key, @app.name)
@@ -365,8 +357,8 @@ module.exports = (app) ->
 								title: subline.name
 							}
 							$scope.chartCanevas.datasets.push dataset
-							$rootScope.statistics_plugin_analytics.lines = $scope.lines
-							$rootScope.statistics_plugin_analytics.chartCanevas = $scope.chartCanevas
+							$rootScope.analytics.lines = $scope.lines
+							$rootScope.analytics.chartCanevas = $scope.chartCanevas
 				drawGraph()
 
 			drawGraph = () ->
@@ -479,13 +471,13 @@ module.exports = (app) ->
 					#	$scope.analytics_info = "You have no analytics yet. Start by creating an app!"
 					#else
 					#	$scope.analytics_info = "You have no analytics yet."
-					$rootScope.statistics_plugin_analytics.analytics_info = $scope.analytics_info
+					$rootScope.analytics.analytics_info = $scope.analytics_info
 					$scope.analyticsLoading = false
 					return false
 				else
 					$scope.noanalytics = false
 					#$scope.analytics_info = ""
-				$rootScope.statistics_plugin_analytics.analytics_info = $scope.analytics_info
+				$rootScope.analytics.analytics_info = $scope.analytics_info
 				$scope.analyticsLoading = false
 				chart = new Chart $("#chartCanevas").get(0).getContext('2d')
 				chart.Line drawData, newopts
