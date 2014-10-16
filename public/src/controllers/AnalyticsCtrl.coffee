@@ -12,9 +12,6 @@ module.exports = (app) ->
 								.then (app_data) ->
 									for j of app_data
 										app[j] = app_data[j]
-										
-									for k,v of app_data.keysets
-										$scope.providers[v] = true
 									next()
 								.fail (e) ->
 									next(e) if e
@@ -75,8 +72,8 @@ module.exports = (app) ->
 					{ name:"requests", value:"req", success:false, error:false, allowuniq:false},
 				]
 
-				# defaultColor = "#428bca"
-				defaultColor = "#474747"
+				# $scope.defaultColor = "#428bca"
+				$scope.defaultColor = "#474747"
 
 				if not $scope.lines
 					$scope.lines = []
@@ -175,7 +172,7 @@ module.exports = (app) ->
 				resetDisplay: () =>
 					@total = null
 					@selTotal = null
-					@color = defaultColor
+					@color = $scope.defaultColor
 					@data = []
 
 			localUpdateLine = (line) ->
@@ -303,6 +300,7 @@ module.exports = (app) ->
 						unit: $scope.timeUnit.value
 						filters: sublinesValues
 						appkeys: appkeys
+					
 					AnalyticsService.getGraphData opts, (successdata, status) ->
 						# console.log "DashboardAnalyticsCtrl getGraphData successdata",successdata
 						totals = successdata.data.totals
@@ -310,7 +308,7 @@ module.exports = (app) ->
 						filters = successdata.data.params.filters.split ","
 						updateChartData(filters, timelines, totals)
 					, (errordata, status) ->
-						# console.log "DashboardAnalyticsCtrl getGraphData errordata",errordata
+						console.log "DashboardAnalyticsCtrl getGraphData errordata",errordata
 
 			updateChartData = (filters, timelines, totals) ->
 				$scope.chartCanevas.datasets = []
@@ -331,7 +329,7 @@ module.exports = (app) ->
 					for line in $scope.lines
 						for subline in line.sublines
 							if subline.displayed and ((subline.value is value and not subline.allapps) or (subline.allapps and subline.value is allappsValue))
-								if subline.color is defaultColor
+								if subline.color is $scope.defaultColor
 									subline.rgb = 'rgba(' + (Math.floor((Math.random() * 210) + 30)) + ',' + (Math.floor((Math.random() * 210) + 30)) + ',' + (Math.floor((Math.random() * 210) + 30))
 								subline.total = 0 if not subline.total
 								subline.total += if not total then +"0" else parseInt(total,10)
@@ -344,7 +342,6 @@ module.exports = (app) ->
 									i++
 								if Object.keys(timeline)?
 									$scope.chartCanevas.labels = Object.keys(timeline)
-
 				for line in $scope.lines
 					for subline in line.sublines
 						if subline.displayed

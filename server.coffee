@@ -84,7 +84,7 @@ module.exports = (env) ->
 			req.filters = req.params.filters.split ","
 			req.appkeys = req.params.appkeys.split ","
 			# console.log ""
-			# console.log "server_statistics analytics"
+			# console.log "server statistics"
 			# console.log "req.appkeys", req.appkeys
 			# console.log "req.filters", req.filters
 			# console.log "req.params", req.params

@@ -10,7 +10,6 @@ module.exports = function(app) {
       analytics_service = {
         getGraphData: function(opts, success, error) {
           var defer;
-          console.log("AnalyticsService getGraphData opts", opts);
           if (opts.unit == null) {
             opts.unit = 'h';
           }
@@ -21,12 +20,7 @@ module.exports = function(app) {
             opts.end = (new Date).getTime();
           }
           defer = Q.defer();
-          api("analytics?filters=" + opts.filters + "&appkeys=" + opts.appkeys + "&start=" + opts.start + "&end=" + opts.end + "&unit=" + opts.unit, function(data) {
-            defer.resolve(data.data);
-          }, function(e) {
-            defer.reject(e);
-          });
-          return defer.promise;
+          return api("/analytics?filters=" + opts.filters + "&appkeys=" + opts.appkeys + "&start=" + opts.start + "&end=" + opts.end + "&unit=" + opts.unit, success, error);
         }
       };
       return analytics_service;

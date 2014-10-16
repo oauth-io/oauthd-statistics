@@ -11,14 +11,9 @@ module.exports = function(app) {
         return AppService.all().then(function(apps) {
           return async.eachSeries(apps, function(app, next) {
             return AppService.get(app.key).then(function(app_data) {
-              var j, k, v, _ref;
+              var j;
               for (j in app_data) {
                 app[j] = app_data[j];
-              }
-              _ref = app_data.keysets;
-              for (k in _ref) {
-                v = _ref[k];
-                $scope.providers[v] = true;
               }
               return next();
             }).fail(function(e) {
@@ -58,7 +53,7 @@ module.exports = function(app) {
         });
       };
       initAnalytics = function() {
-        var defaultColor, filter, _i, _j, _len, _len1, _ref, _ref1;
+        var filter, _i, _j, _len, _len1, _ref, _ref1;
         $scope.analyticsLoading = true;
         $scope.startDates = [
           {
@@ -145,7 +140,7 @@ module.exports = function(app) {
             allowuniq: false
           }
         ];
-        defaultColor = "#474747";
+        $scope.defaultColor = "#474747";
         if (!$scope.lines) {
           $scope.lines = [];
           _ref = $scope.filters;
@@ -284,7 +279,7 @@ module.exports = function(app) {
         Subline.prototype.resetDisplay = function() {
           this.total = null;
           this.selTotal = null;
-          this.color = defaultColor;
+          this.color = $scope.defaultColor;
           return this.data = [];
         };
 
@@ -482,7 +477,9 @@ module.exports = function(app) {
               timelines = successdata.data.timelines;
               filters = successdata.data.params.filters.split(",");
               return updateChartData(filters, timelines, totals);
-            }, function(errordata, status) {});
+            }, function(errordata, status) {
+              return console.log("DashboardAnalyticsCtrl getGraphData errordata", errordata);
+            });
           }
         };
       })(this);
@@ -522,7 +519,7 @@ module.exports = function(app) {
             for (_m = 0, _len4 = _ref3.length; _m < _len4; _m++) {
               subline = _ref3[_m];
               if (subline.displayed && ((subline.value === value && !subline.allapps) || (subline.allapps && subline.value === allappsValue))) {
-                if (subline.color === defaultColor) {
+                if (subline.color === $scope.defaultColor) {
                   subline.rgb = 'rgba(' + (Math.floor((Math.random() * 210) + 30)) + ',' + (Math.floor((Math.random() * 210) + 30)) + ',' + (Math.floor((Math.random() * 210) + 30));
                 }
                 if (!subline.total) {
