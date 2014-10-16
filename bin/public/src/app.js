@@ -31,7 +31,6 @@ require('./controllers/AnalyticsCtrl')(app);
 
 app.run([
   "$rootScope", "$state", function($rootScope, $state) {
-    console.log("APP.coffee oauthd plugin statistics_plugin_DashboardCtrl");
     $rootScope.accessToken = JSON.parse(window.parent.localStorage.__amplify__loginData).data.token;
     return $rootScope.$watch('window.parent.localStorage.__amplify__loginData', function() {
       return $rootScope.accessToken = JSON.parse(window.parent.localStorage.__amplify__loginData).data.token;
@@ -193,12 +192,10 @@ module.exports = function(app) {
           _ref = $scope.filters;
           for (_i = 0, _len = _ref.length; _i < _len; _i++) {
             filter = _ref[_i];
-            console.log("filter", filter);
             $scope.lines.push(new Line(null, Object.clone(filter, true)));
             _ref1 = $scope.apps;
             for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
               app = _ref1[_j];
-              console.log("app", app);
               $scope.lines.push(new Line(Object.clone(app, true), Object.clone(filter, true)));
             }
           }
@@ -212,6 +209,7 @@ module.exports = function(app) {
         if (!$scope.startDate) {
           $scope.changeStartDate($scope.startDates[3]);
         }
+        $scope.$apply();
         if ($scope.chartCanevas.labels && $scope.chartCanevas.labels.length > 0) {
           return drawGraph();
         } else {
@@ -706,14 +704,7 @@ module.exports = function(app) {
           labels: $scope.chartCanevas.labels,
           datasets: $scope.chartCanevas.datasets
         };
-        if (drawData.labels.length === 0 && drawData.datasets.length === 0) {
-          $scope.noanalytics = true;
-          $rootScope.analytics.analytics_info = $scope.analytics_info;
-          $scope.analyticsLoading = false;
-          return false;
-        } else {
-          $scope.noanalytics = false;
-        }
+        $scope.noanalytics = drawData.labels.length === 0 && drawData.datasets.length === 0;
         $rootScope.analytics.analytics_info = $scope.analytics_info;
         $scope.analyticsLoading = false;
         chart = new Chart($("#chartCanevas").get(0).getContext('2d'));
@@ -728,7 +719,6 @@ module.exports = function(app) {
 module.exports = function(app) {
   return app.controller('DashboardCtrl', [
     '$scope', '$state', '$rootScope', function($scope, $state, $rootScope) {
-      console.log("IN statistics_plugin_DashboardCtrl");
       return $scope.state = $state;
     }
   ]);
@@ -819,10 +809,8 @@ module.exports = function(app) {
           var defer;
           defer = Q.defer();
           api('/apps/' + key, function(data) {
-            console.log("AppService get data", data);
             return defer.resolve(data.data);
           }, function(e) {
-            console.log("AppService get fail", e);
             return defer.reject(e);
           });
           return defer.promise;

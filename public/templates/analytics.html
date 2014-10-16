@@ -1,7 +1,6 @@
 Analytics OAuthd Statistics Plugin
 
 <a ui-sref="dashboard">Go to dashboard</a>
-Apps: {{apps}}
 
 <div class="analytics">
 	<div class="toolbar">
@@ -62,12 +61,10 @@ Apps: {{apps}}
 	</div>
 	<div class="canvas">
 		<div class="center-container">
-			<img src="/img/ajax-loader-pricing.gif" ng-show="analyticsLoading"/>
+			<img src="/oauthd/plugins/statistics/img/ajax-loader.gif" ng-show="analyticsLoading"/>
 		</div>
 		<div class="center-container" ng-show="noanalytics">
-			<img style="margin-top:20px" src="/img/noanalytics-yet2.png"/>
-			<h1 style="color:#5e85a1; font-family: Lato">No analytics yet</h1>
-			<p style="color:#5e85a1; font-family: Lato">Make your first connections and track them here</p>
+			<img style="margin-top:20px" src="/oauthd/plugins/statistics/img/noanalytics-yet.png"/>
 		</div>
 		<canvas id="chartCanevas"></canvas>
 	</div>

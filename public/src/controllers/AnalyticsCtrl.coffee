@@ -97,6 +97,7 @@ module.exports = (app) ->
 				if not $scope.startDate
 					$scope.changeStartDate $scope.startDates[3]
 
+				$scope.$apply()
 				if $scope.chartCanevas.labels and $scope.chartCanevas.labels.length > 0
 					drawGraph()
 				else
@@ -371,7 +372,6 @@ module.exports = (app) ->
 				# height = canvas.clientHeight
 				$(".canvas").append "<canvas id=\"chartCanevas\" width=\"" + width + "\" height=\"" + analyticsHeight + "\"></canvas>"
 
-
 				# old opt for chartLine
 				# drawOpt =
 				# 	scaleOverride: true
@@ -464,19 +464,7 @@ module.exports = (app) ->
 				drawData =
 					labels: $scope.chartCanevas.labels
 					datasets: $scope.chartCanevas.datasets
-
-				if drawData.labels.length == 0 and drawData.datasets.length == 0
-					$scope.noanalytics = true
-					#if not $scope.apps || $scope.apps.length == 0
-					#	$scope.analytics_info = "You have no analytics yet. Start by creating an app!"
-					#else
-					#	$scope.analytics_info = "You have no analytics yet."
-					$rootScope.analytics.analytics_info = $scope.analytics_info
-					$scope.analyticsLoading = false
-					return false
-				else
-					$scope.noanalytics = false
-					#$scope.analytics_info = ""
+				$scope.noanalytics = drawData.labels.length is 0 and drawData.datasets.length is 0
 				$rootScope.analytics.analytics_info = $scope.analytics_info
 				$scope.analyticsLoading = false
 				chart = new Chart $("#chartCanevas").get(0).getContext('2d')

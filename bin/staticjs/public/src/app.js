@@ -30,7 +30,6 @@ require('./controllers/AnalyticsCtrl')(app);
 
 app.run([
   "$rootScope", "$state", function($rootScope, $state) {
-    console.log("APP.coffee oauthd plugin statistics_plugin_DashboardCtrl");
     $rootScope.accessToken = JSON.parse(window.parent.localStorage.__amplify__loginData).data.token;
     return $rootScope.$watch('window.parent.localStorage.__amplify__loginData', function() {
       return $rootScope.accessToken = JSON.parse(window.parent.localStorage.__amplify__loginData).data.token;

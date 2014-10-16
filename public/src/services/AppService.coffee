@@ -15,10 +15,8 @@ module.exports = (app) ->
 				get: (key) ->
 					defer = Q.defer()
 					api '/apps/' + key, (data) ->
-						console.log "AppService get data", data
 						defer.resolve data.data
 					, (e) ->
-						console.log "AppService get fail", e
 						defer.reject e
 					return defer.promise
 				create: (app) ->
