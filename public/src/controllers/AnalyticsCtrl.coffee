@@ -1,14 +1,13 @@
-sugar = require 'sugar'
 
 module.exports = (app) ->
 	app.controller('AnalyticsCtrl', ['$scope', '$state', '$rootScope', 'AnalyticsService', 'AppService', 
-		($scope, $state, $rootScope, statistics_plugin_AnalyticsService, AppService) ->
+		($scope, $state, $rootScope, AnalyticsService, AppService) ->
 			console.log "IN statistics_plugin_AnalyticsCtrl"
 			
-			AppService.all()
+			getApps = (callback) ->
+				AppService.all()
 				.then (apps) ->
-					$scope.apps = apps
-					console.log "$scope.apps", $scope.apps
+					console.log "apps", apps
 					# async.eachSeries apps, (app, next) ->
 					# 	AppService.get app.key
 					# 		.then (app_data) ->
@@ -23,12 +22,14 @@ module.exports = (app) ->
 					# 			next()
 					# , (err) ->
 					# 	$scope.$apply()
+					return callback null, apps
 				.fail (e) ->
 					console.log e
+					return callback e if e
 				.finally () ->
 					# $scope.loadingApps = false
 					$scope.$apply()
-
+					
 			if not $rootScope.statistics_plugin_analytics
 				$rootScope.statistics_plugin_analytics = {}
 			else
@@ -38,8 +39,69 @@ module.exports = (app) ->
 				$scope.lines = $rootScope.statistics_plugin_analytics.lines
 				$scope.analytics_info = $rootScope.statistics_plugin_analytics.analytics_info
 
+			initCtrl = () ->
+				$scope.apps = []
+				console.log "initCtrl before getApps", $scope.apps
+				getApps (err, apps) ->
+					console.log "initCtrl getApps err", err
+					if not err
+						$scope.apps = apps
+						console.log "end initCtrl $scope.apps", $scope.apps
+						initAnalytics()
+
 			initAnalytics = () ->
 				$scope.analyticsLoading = true
+				#
+				# Stats date time
+				#
+				$scope.startDates = [
+					{ name:"Past 1 days", value:"1", unit:"h", unitname:"Hours"},
+					{ name:"Past 3 days", value:"3", unit:"d", unitname:"Days"},
+					{ name:"Past 5 days", value:"5", unit:"d", unitname:"Days"},
+					{ name:"Past 15 days", value:"15", unit:"d", unitname:"Days"},
+					{ name:"Past month", value:"31", unit:"d", unitname:"Days"},
+					{ name:"Past 3 month", value:"92", unit:"m", unitname:"Months"},
+					{ name:"Past 6 month", value:"183", unit:"m", unitname:"Months"},
+					{ name:"Forever", value:"0", unit:"m", unitname:"Months"}
+				]
+				# $scope.startDate = $scope.startDates[3]
+				
+				$scope.timeUnits = [
+					{ name:"Hours", value:"h", enabled:true},
+					{ name:"Days", value:"d", enabled:true},
+					{ name:"Months", value:"m", enabled:true}
+				]
+				# $scope.timeUnit = $scope.timeUnits[1]
+				
+				#
+				# Filters
+				#
+				$scope.filters = [
+					{ name:"connexions", value:"co", success:false, error:false, allowuniq:true},
+					{ name:"connexions success", value:"co", success:true, error:false, allowuniq:true},
+					{ name:"connexions fails", value:"co", success:false, error:true, allowuniq:true},
+					{ name:"requests", value:"req", success:false, error:false, allowuniq:false},
+				]
+
+				# defaultColor = "#428bca"
+				defaultColor = "#474747"
+
+				if not $scope.lines
+					$scope.lines = []
+					for filter in $scope.filters
+						$scope.lines.push new Line(null, Object.clone(filter, true))
+						for app in $scope.apps
+							$scope.lines.push new Line(Object.clone(app, true), Object.clone(filter, true))
+
+				#
+				#Chart drawing
+				#
+				if not $scope.chartCanevas
+					$scope.chartCanevas = {}
+					$scope.chartCanevas.labels = []
+					$scope.chartCanevas.datasets = []
+					$scope.chartCanevas.maxSelTotal = 0
+
 				if not $scope.startDate
 					$scope.changeStartDate $scope.startDates[3]
 
@@ -47,33 +109,12 @@ module.exports = (app) ->
 					drawGraph()
 				else
 					localUpdateLine $scope.lines[0]
-			#
-			# Stats date time
-			#
-			$scope.startDates = [
-				{ name:"Past 1 days", value:"1", unit:"h", unitname:"Hours"},
-				{ name:"Past 3 days", value:"3", unit:"d", unitname:"Days"},
-				{ name:"Past 5 days", value:"5", unit:"d", unitname:"Days"},
-				{ name:"Past 15 days", value:"15", unit:"d", unitname:"Days"},
-				{ name:"Past month", value:"31", unit:"d", unitname:"Days"},
-				{ name:"Past 3 month", value:"92", unit:"m", unitname:"Months"},
-				{ name:"Past 6 month", value:"183", unit:"m", unitname:"Months"},
-				{ name:"Forever", value:"0", unit:"m", unitname:"Months"}
-			]
-			# $scope.startDate = $scope.startDates[3]
+			
 
 			$scope.changeStartDate = (selected) ->
 				$scope.startDate = selected
 				$rootScope.statistics_plugin_analytics.startDate = $scope.startDate
 				$scope.changeUnit s=name:selected.unitname, value:selected.unit
-
-			$scope.timeUnits = [
-				{ name:"Hours", value:"h", enabled:true},
-				{ name:"Days", value:"d", enabled:true},
-				{ name:"Months", value:"m", enabled:true}
-			]
-
-			# $scope.timeUnit = $scope.timeUnits[1]
 
 			$scope.changeUnit = (selected) ->
 				$scope.timeUnit = selected
@@ -89,18 +130,6 @@ module.exports = (app) ->
 					return false
 				return true
 
-			#
-			# Filters
-			#
-			$scope.filters = [
-				{ name:"connexions", value:"co", success:false, error:false, allowuniq:true},
-				{ name:"connexions success", value:"co", success:true, error:false, allowuniq:true},
-				{ name:"connexions fails", value:"co", success:false, error:true, allowuniq:true},
-				{ name:"requests", value:"req", success:false, error:false, allowuniq:false},
-			]
-
-			# defaultColor = "#428bca"
-			defaultColor = "#474747"
 			class Line
 				constructor: (app, filter) ->
 					@app = if app? then app else {}
@@ -114,7 +143,7 @@ module.exports = (app) ->
 							@sublines.push new Subline(@filter, provider, @app.key, @app.name)
 					else
 						counter = 0
-						for app in $rootScope.me.apps
+						for app in $scope.apps
 							for provider in app.keysets
 								counter++
 								@sublines.push new Subline(@filter, provider, null, null)
@@ -123,7 +152,7 @@ module.exports = (app) ->
 
 			class Subline
 				constructor: (filter, provider, appkey, appname) ->
-					@filter = sugar.clone(filter, true)
+					@filter = Object.clone(filter, true)
 					@filter.unique = false if @filter.allowuniq
 					@provider = provider
 					@appkey = appkey
@@ -155,13 +184,6 @@ module.exports = (app) ->
 					@selTotal = null
 					@color = defaultColor
 					@data = []
-
-			if not $scope.lines
-				$scope.lines = []
-				for filter in $scope.filters
-					$scope.lines.push new Line(null, sugar.clone(filter, true))
-					for app in $rootScope.me.apps
-						$scope.lines.push new Line(sugar.clone(app, true), sugar.clone(filter, true))
 
 			localUpdateLine = (line) ->
 				line.active = !line.active
@@ -259,14 +281,6 @@ module.exports = (app) ->
 						break
 				return undisplayed
 
-			#
-			#Chart drawing
-			#
-			if not $scope.chartCanevas
-				$scope.chartCanevas = {}
-				$scope.chartCanevas.labels = []
-				$scope.chartCanevas.datasets = []
-				$scope.chartCanevas.maxSelTotal = 0
 
 			#Call to backend webservice to get timelines
 			getGraphData = () =>
@@ -277,7 +291,7 @@ module.exports = (app) ->
 						for subline in line.sublines
 							if subline.displayed and subline.active
 								if subline.allapps
-									for app in $rootScope.me.apps
+									for app in $scope.apps
 										value = subline.value
 										sublinesValues.push value.replace ":allapps", ":allapps:" + app.key
 										appkeys.push app.key
@@ -461,7 +475,7 @@ module.exports = (app) ->
 
 				if drawData.labels.length == 0 and drawData.datasets.length == 0
 					$scope.noanalytics = true
-					#if not $rootScope.me.apps || $rootScope.me.apps.length == 0
+					#if not $scope.apps || $scope.apps.length == 0
 					#	$scope.analytics_info = "You have no analytics yet. Start by creating an app!"
 					#else
 					#	$scope.analytics_info = "You have no analytics yet."
@@ -476,6 +490,7 @@ module.exports = (app) ->
 				chart = new Chart $("#chartCanevas").get(0).getContext('2d')
 				chart.Line drawData, newopts
 
-			initAnalytics()
+			# initAnalytics()
+			initCtrl()
 
 	])

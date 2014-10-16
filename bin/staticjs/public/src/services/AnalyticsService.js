@@ -3,7 +3,7 @@ var Q;
 Q = require('q');
 
 module.exports = function(app) {
-  return app.factory('statistics_plugin_AnalyticsService', [
+  return app.factory('AnalyticsService', [
     '$http', '$rootScope', '$location', function($http, $rootScope, $location) {
       var analytics_service, api;
       api = require('../utilities/apiCaller')($http, $rootScope);

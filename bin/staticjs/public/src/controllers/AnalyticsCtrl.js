@@ -1,21 +1,23 @@
-var sugar,
-  __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
-
-sugar = require('sugar');
+var __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
 module.exports = function(app) {
-  return app.controller('statistics_plugin_AnalyticsCtrl', [
-    '$scope', '$state', '$rootScope', 'statistics_plugin_AnalyticsService', 'AppService', function($scope, $state, $rootScope, statistics_plugin_AnalyticsService, AppService) {
-      var Line, Subline, defaultColor, drawGraph, filter, getGraphData, initAnalytics, localUpdateLine, updateChartData, updateLineActive, _i, _j, _len, _len1, _ref, _ref1;
+  return app.controller('AnalyticsCtrl', [
+    '$scope', '$state', '$rootScope', 'AnalyticsService', 'AppService', function($scope, $state, $rootScope, AnalyticsService, AppService) {
+      var Line, Subline, drawGraph, getApps, getGraphData, initAnalytics, initCtrl, localUpdateLine, updateChartData, updateLineActive;
       console.log("IN statistics_plugin_AnalyticsCtrl");
-      AppService.all().then(function(apps) {
-        $scope.apps = apps;
-        return console.log("$scope.apps", $scope.apps);
-      }).fail(function(e) {
-        return console.log(e);
-      })["finally"](function() {
-        return $scope.$apply();
-      });
+      getApps = function(callback) {
+        return AppService.all().then(function(apps) {
+          console.log("apps", apps);
+          return callback(null, apps);
+        }).fail(function(e) {
+          console.log(e);
+          if (e) {
+            return callback(e);
+          }
+        })["finally"](function() {
+          return $scope.$apply();
+        });
+      };
       if (!$rootScope.statistics_plugin_analytics) {
         $rootScope.statistics_plugin_analytics = {};
       } else {
@@ -25,8 +27,126 @@ module.exports = function(app) {
         $scope.lines = $rootScope.statistics_plugin_analytics.lines;
         $scope.analytics_info = $rootScope.statistics_plugin_analytics.analytics_info;
       }
+      initCtrl = function() {
+        $scope.apps = [];
+        console.log("initCtrl before getApps", $scope.apps);
+        return getApps(function(err, apps) {
+          console.log("initCtrl getApps err", err);
+          if (!err) {
+            $scope.apps = apps;
+            console.log("end initCtrl $scope.apps", $scope.apps);
+            return initAnalytics();
+          }
+        });
+      };
       initAnalytics = function() {
+        var defaultColor, filter, _i, _j, _len, _len1, _ref, _ref1;
         $scope.analyticsLoading = true;
+        $scope.startDates = [
+          {
+            name: "Past 1 days",
+            value: "1",
+            unit: "h",
+            unitname: "Hours"
+          }, {
+            name: "Past 3 days",
+            value: "3",
+            unit: "d",
+            unitname: "Days"
+          }, {
+            name: "Past 5 days",
+            value: "5",
+            unit: "d",
+            unitname: "Days"
+          }, {
+            name: "Past 15 days",
+            value: "15",
+            unit: "d",
+            unitname: "Days"
+          }, {
+            name: "Past month",
+            value: "31",
+            unit: "d",
+            unitname: "Days"
+          }, {
+            name: "Past 3 month",
+            value: "92",
+            unit: "m",
+            unitname: "Months"
+          }, {
+            name: "Past 6 month",
+            value: "183",
+            unit: "m",
+            unitname: "Months"
+          }, {
+            name: "Forever",
+            value: "0",
+            unit: "m",
+            unitname: "Months"
+          }
+        ];
+        $scope.timeUnits = [
+          {
+            name: "Hours",
+            value: "h",
+            enabled: true
+          }, {
+            name: "Days",
+            value: "d",
+            enabled: true
+          }, {
+            name: "Months",
+            value: "m",
+            enabled: true
+          }
+        ];
+        $scope.filters = [
+          {
+            name: "connexions",
+            value: "co",
+            success: false,
+            error: false,
+            allowuniq: true
+          }, {
+            name: "connexions success",
+            value: "co",
+            success: true,
+            error: false,
+            allowuniq: true
+          }, {
+            name: "connexions fails",
+            value: "co",
+            success: false,
+            error: true,
+            allowuniq: true
+          }, {
+            name: "requests",
+            value: "req",
+            success: false,
+            error: false,
+            allowuniq: false
+          }
+        ];
+        defaultColor = "#474747";
+        if (!$scope.lines) {
+          $scope.lines = [];
+          _ref = $scope.filters;
+          for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+            filter = _ref[_i];
+            $scope.lines.push(new Line(null, Object.clone(filter, true)));
+            _ref1 = $scope.apps;
+            for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
+              app = _ref1[_j];
+              $scope.lines.push(new Line(Object.clone(app, true), Object.clone(filter, true)));
+            }
+          }
+        }
+        if (!$scope.chartCanevas) {
+          $scope.chartCanevas = {};
+          $scope.chartCanevas.labels = [];
+          $scope.chartCanevas.datasets = [];
+          $scope.chartCanevas.maxSelTotal = 0;
+        }
         if (!$scope.startDate) {
           $scope.changeStartDate($scope.startDates[3]);
         }
@@ -36,49 +156,6 @@ module.exports = function(app) {
           return localUpdateLine($scope.lines[0]);
         }
       };
-      $scope.startDates = [
-        {
-          name: "Past 1 days",
-          value: "1",
-          unit: "h",
-          unitname: "Hours"
-        }, {
-          name: "Past 3 days",
-          value: "3",
-          unit: "d",
-          unitname: "Days"
-        }, {
-          name: "Past 5 days",
-          value: "5",
-          unit: "d",
-          unitname: "Days"
-        }, {
-          name: "Past 15 days",
-          value: "15",
-          unit: "d",
-          unitname: "Days"
-        }, {
-          name: "Past month",
-          value: "31",
-          unit: "d",
-          unitname: "Days"
-        }, {
-          name: "Past 3 month",
-          value: "92",
-          unit: "m",
-          unitname: "Months"
-        }, {
-          name: "Past 6 month",
-          value: "183",
-          unit: "m",
-          unitname: "Months"
-        }, {
-          name: "Forever",
-          value: "0",
-          unit: "m",
-          unitname: "Months"
-        }
-      ];
       $scope.changeStartDate = function(selected) {
         var s;
         $scope.startDate = selected;
@@ -88,21 +165,6 @@ module.exports = function(app) {
           value: selected.unit
         });
       };
-      $scope.timeUnits = [
-        {
-          name: "Hours",
-          value: "h",
-          enabled: true
-        }, {
-          name: "Days",
-          value: "d",
-          enabled: true
-        }, {
-          name: "Months",
-          value: "m",
-          enabled: true
-        }
-      ];
       $scope.changeUnit = function(selected) {
         $scope.timeUnit = selected;
         $rootScope.statistics_plugin_analytics.timeUnit = $scope.timeUnit;
@@ -120,34 +182,6 @@ module.exports = function(app) {
         }
         return true;
       };
-      $scope.filters = [
-        {
-          name: "connexions",
-          value: "co",
-          success: false,
-          error: false,
-          allowuniq: true
-        }, {
-          name: "connexions success",
-          value: "co",
-          success: true,
-          error: false,
-          allowuniq: true
-        }, {
-          name: "connexions fails",
-          value: "co",
-          success: false,
-          error: true,
-          allowuniq: true
-        }, {
-          name: "requests",
-          value: "req",
-          success: false,
-          error: false,
-          allowuniq: false
-        }
-      ];
-      defaultColor = "#474747";
       Line = (function() {
         function Line(app, filter) {
           var counter, provider, _i, _j, _k, _len, _len1, _len2, _ref, _ref1, _ref2;
@@ -166,7 +200,7 @@ module.exports = function(app) {
             }
           } else {
             counter = 0;
-            _ref1 = $rootScope.me.apps;
+            _ref1 = $scope.apps;
             for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
               app = _ref1[_j];
               _ref2 = app.keysets;
@@ -188,7 +222,7 @@ module.exports = function(app) {
       Subline = (function() {
         function Subline(filter, provider, appkey, appname) {
           this.resetDisplay = __bind(this.resetDisplay, this);
-          this.filter = sugar.clone(filter, true);
+          this.filter = Object.clone(filter, true);
           if (this.filter.allowuniq) {
             this.filter.unique = false;
           }
@@ -238,26 +272,13 @@ module.exports = function(app) {
         return Subline;
 
       })();
-      if (!$scope.lines) {
-        $scope.lines = [];
-        _ref = $scope.filters;
-        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-          filter = _ref[_i];
-          $scope.lines.push(new Line(null, sugar.clone(filter, true)));
-          _ref1 = $rootScope.me.apps;
-          for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
-            app = _ref1[_j];
-            $scope.lines.push(new Line(sugar.clone(app, true), sugar.clone(filter, true)));
-          }
-        }
-      }
       localUpdateLine = function(line) {
-        var index, subline, _k, _l, _len2, _len3, _ref2, _ref3;
+        var index, subline, _i, _j, _len, _len1, _ref, _ref1;
         line.active = !line.active;
         if (line.active) {
-          _ref2 = line.sublines;
-          for (index = _k = 0, _len2 = _ref2.length; _k < _len2; index = ++_k) {
-            subline = _ref2[index];
+          _ref = line.sublines;
+          for (index = _i = 0, _len = _ref.length; _i < _len; index = ++_i) {
+            subline = _ref[index];
             subline.updateValueName();
             if (index === 0) {
               subline.active = true;
@@ -265,9 +286,9 @@ module.exports = function(app) {
             }
           }
         } else {
-          _ref3 = line.sublines;
-          for (_l = 0, _len3 = _ref3.length; _l < _len3; _l++) {
-            subline = _ref3[_l];
+          _ref1 = line.sublines;
+          for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
+            subline = _ref1[_j];
             subline.active = false;
             subline.displayed = false;
             subline.filter.unique = false;
@@ -285,12 +306,12 @@ module.exports = function(app) {
         }
       };
       updateLineActive = function(line) {
-        var subline, _k, _len2, _ref2, _results;
+        var subline, _i, _len, _ref, _results;
         line.active = false;
-        _ref2 = line.sublines;
+        _ref = line.sublines;
         _results = [];
-        for (_k = 0, _len2 = _ref2.length; _k < _len2; _k++) {
-          subline = _ref2[_k];
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          subline = _ref[_i];
           if (subline.active) {
             line.active = true;
             break;
@@ -363,14 +384,14 @@ module.exports = function(app) {
         return line.active;
       };
       $scope.displayedSublines = function(line) {
-        var displayed, subline, _k, _len2, _ref2;
+        var displayed, subline, _i, _len, _ref;
         if (!line.active) {
           return false;
         }
         displayed = false;
-        _ref2 = line.sublines;
-        for (_k = 0, _len2 = _ref2.length; _k < _len2; _k++) {
-          subline = _ref2[_k];
+        _ref = line.sublines;
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          subline = _ref[_i];
           if (subline.displayed && subline.active) {
             displayed = true;
             break;
@@ -379,14 +400,14 @@ module.exports = function(app) {
         return displayed;
       };
       $scope.undisplayedSublines = function(line) {
-        var subline, undisplayed, _k, _len2, _ref2;
+        var subline, undisplayed, _i, _len, _ref;
         if (!line.active) {
           return false;
         }
         undisplayed = false;
-        _ref2 = line.sublines;
-        for (_k = 0, _len2 = _ref2.length; _k < _len2; _k++) {
-          subline = _ref2[_k];
+        _ref = line.sublines;
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          subline = _ref[_i];
           if (!subline.displayed && subline.active) {
             undisplayed = true;
             break;
@@ -394,29 +415,23 @@ module.exports = function(app) {
         }
         return undisplayed;
       };
-      if (!$scope.chartCanevas) {
-        $scope.chartCanevas = {};
-        $scope.chartCanevas.labels = [];
-        $scope.chartCanevas.datasets = [];
-        $scope.chartCanevas.maxSelTotal = 0;
-      }
       getGraphData = (function(_this) {
         return function() {
-          var appkeys, dateStart, line, opts, subline, sublinesValues, value, _k, _l, _len2, _len3, _len4, _m, _ref2, _ref3, _ref4;
+          var appkeys, dateStart, line, opts, subline, sublinesValues, value, _i, _j, _k, _len, _len1, _len2, _ref, _ref1, _ref2;
           sublinesValues = [];
           appkeys = [];
-          _ref2 = $scope.lines;
-          for (_k = 0, _len2 = _ref2.length; _k < _len2; _k++) {
-            line = _ref2[_k];
+          _ref = $scope.lines;
+          for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+            line = _ref[_i];
             if (line.active) {
-              _ref3 = line.sublines;
-              for (_l = 0, _len3 = _ref3.length; _l < _len3; _l++) {
-                subline = _ref3[_l];
+              _ref1 = line.sublines;
+              for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
+                subline = _ref1[_j];
                 if (subline.displayed && subline.active) {
                   if (subline.allapps) {
-                    _ref4 = $rootScope.me.apps;
-                    for (_m = 0, _len4 = _ref4.length; _m < _len4; _m++) {
-                      app = _ref4[_m];
+                    _ref2 = $scope.apps;
+                    for (_k = 0, _len2 = _ref2.length; _k < _len2; _k++) {
+                      app = _ref2[_k];
                       value = subline.value;
                       sublinesValues.push(value.replace(":allapps", ":allapps:" + app.key));
                       appkeys.push(app.key);
@@ -453,20 +468,20 @@ module.exports = function(app) {
         };
       })(this);
       updateChartData = function(filters, timelines, totals) {
-        var aPos, allappsValue, dataset, endPos, i, k, line, subline, timeline, total, v, value, _k, _l, _len2, _len3, _len4, _len5, _len6, _len7, _len8, _m, _n, _o, _p, _q, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7;
+        var aPos, allappsValue, dataset, endPos, i, k, line, subline, timeline, total, v, value, _i, _j, _k, _l, _len, _len1, _len2, _len3, _len4, _len5, _len6, _m, _n, _o, _ref, _ref1, _ref2, _ref3, _ref4, _ref5;
         $scope.chartCanevas.datasets = [];
         $scope.chartCanevas.maxSelTotal = 0;
-        _ref2 = $scope.lines;
-        for (_k = 0, _len2 = _ref2.length; _k < _len2; _k++) {
-          line = _ref2[_k];
-          _ref3 = line.sublines;
-          for (_l = 0, _len3 = _ref3.length; _l < _len3; _l++) {
-            subline = _ref3[_l];
+        _ref = $scope.lines;
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          line = _ref[_i];
+          _ref1 = line.sublines;
+          for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
+            subline = _ref1[_j];
             subline.resetDisplay();
           }
         }
-        for (_m = 0, _len4 = filters.length; _m < _len4; _m++) {
-          value = filters[_m];
+        for (_k = 0, _len2 = filters.length; _k < _len2; _k++) {
+          value = filters[_k];
           total = totals.shift();
           timeline = timelines.shift();
           aPos = value.search(":allapps:");
@@ -481,12 +496,12 @@ module.exports = function(app) {
             endPos = value.length;
           }
           allappsValue = aPos !== -1 ? value.replace(value.substring(aPos, endPos), ":allapps") : null;
-          _ref4 = $scope.lines;
-          for (_n = 0, _len5 = _ref4.length; _n < _len5; _n++) {
-            line = _ref4[_n];
-            _ref5 = line.sublines;
-            for (_o = 0, _len6 = _ref5.length; _o < _len6; _o++) {
-              subline = _ref5[_o];
+          _ref2 = $scope.lines;
+          for (_l = 0, _len3 = _ref2.length; _l < _len3; _l++) {
+            line = _ref2[_l];
+            _ref3 = line.sublines;
+            for (_m = 0, _len4 = _ref3.length; _m < _len4; _m++) {
+              subline = _ref3[_m];
               if (subline.displayed && ((subline.value === value && !subline.allapps) || (subline.allapps && subline.value === allappsValue))) {
                 if (subline.color === defaultColor) {
                   subline.rgb = 'rgba(' + (Math.floor((Math.random() * 210) + 30)) + ',' + (Math.floor((Math.random() * 210) + 30)) + ',' + (Math.floor((Math.random() * 210) + 30));
@@ -513,12 +528,12 @@ module.exports = function(app) {
             }
           }
         }
-        _ref6 = $scope.lines;
-        for (_p = 0, _len7 = _ref6.length; _p < _len7; _p++) {
-          line = _ref6[_p];
-          _ref7 = line.sublines;
-          for (_q = 0, _len8 = _ref7.length; _q < _len8; _q++) {
-            subline = _ref7[_q];
+        _ref4 = $scope.lines;
+        for (_n = 0, _len5 = _ref4.length; _n < _len5; _n++) {
+          line = _ref4[_n];
+          _ref5 = line.sublines;
+          for (_o = 0, _len6 = _ref5.length; _o < _len6; _o++) {
+            subline = _ref5[_o];
             if (subline.displayed) {
               subline.color = subline.rgb + ",1)";
               dataset = {
@@ -642,7 +657,7 @@ module.exports = function(app) {
         chart = new Chart($("#chartCanevas").get(0).getContext('2d'));
         return chart.Line(drawData, newopts);
       };
-      return initAnalytics();
+      return initCtrl();
     }
   ]);
 };
