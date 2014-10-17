@@ -12,11 +12,21 @@ module.exports = function(grunt) {
 					bare: true
 				}
 			},
-			static: {
+			back: {
 				expand: true,
-				cwd: __dirname,
-				src: ['public/**/*.coffee'],
-				dest: 'bin/staticjs',
+				cwd: __dirname + '/src/back',
+				src: ['**/*.coffee'],
+				dest: 'bin',
+				ext: '.js',
+				options: {
+					bare: true
+				}
+			},
+			front: {
+				expand: true,
+				cwd: __dirname + '/src/front',
+				src: ['**/*.coffee'],
+				dest: 'public',
 				ext: '.js',
 				options: {
 					bare: true
@@ -25,16 +35,16 @@ module.exports = function(grunt) {
 		},
 		browserify: {
 			js: {
-				src: 'bin/staticjs/public/src/app.js',
-				dest: 'bin/public/src/app.js'
+				src: 'public/src/app.js',
+				dest: 'public/src/browserify-app.js'
 			}
 		},
 		copy: {
 			all: {
 				expand: true,
-				cwd: './public/',
-				src: ['**/*.html', '**/*.map', '**/*.json', '**/*.png', '**/*.gif', 'libs/**/*.js','libs/**/*.css', 'style/fonts/*'],
-				dest: 'bin/public'
+				cwd: './src/front',
+				src: ['**', '!**/*.coffee', '!**/*.less'],
+				dest: 'public'
 			}
 		},
 		less: {
@@ -44,7 +54,7 @@ module.exports = function(grunt) {
 					cleancss: true
 				},
 				files: {
-					"bin/public/style/main.css": "public/style/main.less"
+					"public/style/main.css": "src/front/style/main.less"
 				}
 			}
 		}
