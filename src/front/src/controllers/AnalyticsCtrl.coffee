@@ -366,6 +366,8 @@ module.exports = (app) ->
 				analyticsHeight = $(".analytics").get(0).clientHeight * 0.95
 				canvas.style.height = analyticsHeight
 				width = canvas.clientWidth
+				console.log "analyticsHeight", analyticsHeight
+				console.log "width", width
 				# height = canvas.clientHeight
 				$(".canvas").append "<canvas id=\"chartCanevas\" width=\"" + width + "\" height=\"" + analyticsHeight + "\"></canvas>"
 

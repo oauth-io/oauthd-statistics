@@ -578,6 +578,8 @@ module.exports = function(app) {
         analyticsHeight = $(".analytics").get(0).clientHeight * 0.95;
         canvas.style.height = analyticsHeight;
         width = canvas.clientWidth;
+        console.log("analyticsHeight", analyticsHeight);
+        console.log("width", width);
         $(".canvas").append("<canvas id=\"chartCanevas\" width=\"" + width + "\" height=\"" + analyticsHeight + "\"></canvas>");
         newopts = {
           pointDot: true,
