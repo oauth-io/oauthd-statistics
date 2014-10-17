@@ -363,11 +363,9 @@ module.exports = (app) ->
 				chartCanevas = $("#chartCanevas").get(0)
 				chartCanevas.remove() if chartCanevas
 				canvas = $(".canvas").get(0)
-				analyticsHeight = $(".analytics").get(0).clientHeight * 0.95
+				analyticsHeight = $(".analytics").get(0).clientHeight * 0.80
 				canvas.style.height = analyticsHeight
 				width = canvas.clientWidth
-				console.log "analyticsHeight", analyticsHeight
-				console.log "width", width
 				# height = canvas.clientHeight
 				$(".canvas").append "<canvas id=\"chartCanevas\" width=\"" + width + "\" height=\"" + analyticsHeight + "\"></canvas>"
 
@@ -466,6 +464,7 @@ module.exports = (app) ->
 				$scope.noanalytics = drawData.labels.length is 0 and drawData.datasets.length is 0
 				$rootScope.analytics.analytics_info = $scope.analytics_info
 				$scope.analyticsLoading = false
+				$scope.$apply()
 				chart = new Chart $("#chartCanevas").get(0).getContext('2d')
 				chart.Line drawData, newopts
 

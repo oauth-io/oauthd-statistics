@@ -3715,11 +3715,9 @@ module.exports = function(app) {
           chartCanevas.remove();
         }
         canvas = $(".canvas").get(0);
-        analyticsHeight = $(".analytics").get(0).clientHeight * 0.95;
+        analyticsHeight = $(".analytics").get(0).clientHeight * 0.80;
         canvas.style.height = analyticsHeight;
         width = canvas.clientWidth;
-        console.log("analyticsHeight", analyticsHeight);
-        console.log("width", width);
         $(".canvas").append("<canvas id=\"chartCanevas\" width=\"" + width + "\" height=\"" + analyticsHeight + "\"></canvas>");
         newopts = {
           pointDot: true,
@@ -3805,6 +3803,7 @@ module.exports = function(app) {
         $scope.noanalytics = drawData.labels.length === 0 && drawData.datasets.length === 0;
         $rootScope.analytics.analytics_info = $scope.analytics_info;
         $scope.analyticsLoading = false;
+        $scope.$apply();
         chart = new Chart($("#chartCanevas").get(0).getContext('2d'));
         return chart.Line(drawData, newopts);
       };
