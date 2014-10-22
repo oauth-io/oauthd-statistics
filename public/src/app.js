@@ -12,8 +12,8 @@ app = angular.module("oauthd_stats_plugin", ["ui.router"]).config([
       templateUrl: 'templates/analytics.html',
       controller: 'AnalyticsCtrl'
     });
-    $urlRouterProvider.when("", "dashboard");
-    return $urlRouterProvider.otherwise("dashboard");
+    $urlRouterProvider.when("", "analytics");
+    return $urlRouterProvider.otherwise("analytics");
   }
 ]);
 

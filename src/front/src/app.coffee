@@ -12,10 +12,10 @@ app = angular.module("oauthd_stats_plugin", ["ui.router"]).config(["$stateProvid
 			templateUrl: 'templates/analytics.html'
 			controller: 'AnalyticsCtrl'
 
-		$urlRouterProvider.when "", "dashboard"
-		$urlRouterProvider.otherwise "dashboard"
+		$urlRouterProvider.when "", "analytics"
+		$urlRouterProvider.otherwise "analytics"
 
-		# $locationProvider.html5Mode(true)
+
 ])
 
 require('./filters/filters') app

@@ -1,7 +1,5 @@
 {
 	"name": "statistics",
-	"description": "A plugins that allow to get stats on connexion.",
-	"version": "0.0.1",
-	"main": "index.js",
+	"description": "Provides you with a simple statistics interface for oauthd",
 	"interface_enabled": true
 }
